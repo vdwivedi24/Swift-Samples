@@ -157,5 +157,135 @@ print(total)
 // END: Adapter design pattern
 
 
+// START: Decorator design pattern
+
+class UserDefaultsDecorator: UserDefaults {
+    private var userDefaults = UserDefaults.standard
+    
+    convenience init(userDefaults: UserDefaults) {
+        self.init()
+        self.userDefaults = userDefaults
+    }
+    
+    func set(date: Date?, forKey key: String) {
+        userDefaults.set(date, forKey: key)
+    }
+    
+    func date(forKey key: String) -> Date? {
+        return userDefaults.value(forKey: key) as? Date
+    }
+}
+
+let userDefaults = UserDefaultsDecorator()
+
+userDefaults.set(42, forKey: "the answer")
+print(userDefaults.string(forKey: "the answer") ?? "?")
+
+userDefaults.set(date: Date(), forKey: "now")
+
+// END: Decorator design pattern
 
 
+//START: Prototype design pattern
+
+class NameClass: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        return NameClass(firstName: self.firstName, lastName: self.lastName)
+    }
+    
+    func clone() -> NameClass {
+        return self.copy() as! NameClass
+    }
+    
+    var firstName: String
+    var lastName: String
+    
+    init(firstName: String, lastName: String) {
+        self.firstName = firstName
+        self.lastName = lastName
+    }
+}
+
+extension NameClass: CustomStringConvertible {
+    public var description: String {
+        return "NameClass(firstName: \"\(firstName)\", lastName: \"\(lastName)\")"
+    }
+}
+
+var steve = NameClass(firstName: "Steve", lastName: "Johnson")
+var john = steve.clone()
+
+print("\(steve), \(john)")
+
+john.firstName = "John"
+john.lastName = "Wallace"
+
+print("\(steve), \(john)")
+
+
+// END:  Prototype design pattern
+
+
+//START: Fly weight design pattern
+
+class SharedSpaceShipData {
+    private let mesh: [Float]
+    private let texture: UIImage?
+
+    init(mesh: [Float], imageNamed name: String) {
+        self.mesh = mesh
+        self.texture = UIImage(named: name)
+    }
+}
+
+class SpaceShip {
+    private var position: (Float, Float, Float)
+    private var intrinsicState: SharedSpaceShipData
+
+    init(sharedData: SharedSpaceShipData, position: (Float, Float, Float) = (0, 0, 0)) {
+        self.position = position
+        self.intrinsicState = sharedData
+    }
+}
+
+
+
+let fleetSize = 1000
+var ships = [SpaceShip]()
+var vertices = [Float](repeating: 0, count: 1000) // just a dummy array of floats
+
+let sharedState = SharedSpaceShipData(mesh: vertices, imageNamed: "SpaceShip")
+
+for _ in 0..<fleetSize {
+    let ship = SpaceShip(sharedData: sharedState,
+                         position: (Float.random(in: 1...100),
+                                    Float.random(in: 1...100),
+                                    Float.random(in: 1...100)))
+    ships.append(ship)
+}
+
+// END: Fly weight design pattern
+
+
+
+
+//START: Proxy design pattern
+
+class RandomIntWithID {
+    var value: Int = {
+        print("value initialized")
+        return Int.random(in: Int.min...Int.max)
+    }()
+    
+    lazy var uid: String = {
+        print("uid initialized")
+        return UUID().uuidString
+    }()
+}
+
+let n = RandomIntWithID()
+print(n.uid)
+
+
+
+//END: Proxy design pattern
